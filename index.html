@@ -1436,6 +1436,8 @@
     state.voices = synth.getVoices();
     const sel = el('voiceSelect');
     const current = sel.value;
+    const globalVoice = (() => { try { return JSON.parse(localStorage.getItem('reading-room-global-settings-v1') || '{}').voiceName || ''; } catch(e) { return ''; } })();
+    const savedVoice = globalVoice || current;
     sel.innerHTML = '';
     const sorted = state.voices.slice()
       .sort((a,b) => (a.lang||'').localeCompare(b.lang||'') || a.name.localeCompare(b.name));
@@ -1445,12 +1447,38 @@
       opt.textContent = v.name + ' (' + v.lang + ')' + (v.localService ? '' : ' ·  network');
       sel.appendChild(opt);
     });
-    if(current) sel.value = current;
+
+    // Prefer the globally saved voice so every book uses the same selection.
+    if(savedVoice && sorted.some(v => v.name === savedVoice)){
+      sel.value = savedVoice;
+      try {
+        const settings = JSON.parse(localStorage.getItem('reading-room-global-settings-v1') || '{}');
+        settings.voiceName = savedVoice;
+        localStorage.setItem('reading-room-global-settings-v1', JSON.stringify(settings));
+      } catch(e) {}
+    }else if(sel.options.length){
+      sel.selectedIndex = 0;
+      try {
+        const settings = JSON.parse(localStorage.getItem('reading-room-global-settings-v1') || '{}');
+        settings.voiceName = sel.value;
+        localStorage.setItem('reading-room-global-settings-v1', JSON.stringify(settings));
+      } catch(e) {}
+    }
+    saveGlobalSettings();
     renderInstalledVoicesList(sorted);
   }
   if(ttsSupported){
     populateVoices();
     synth.addEventListener('voiceschanged', populateVoices);
+
+    // The voice is a global reader preference, not a per-book setting.
+    el('voiceSelect').addEventListener('change', e => {
+      try {
+        const settings = JSON.parse(localStorage.getItem('reading-room-global-settings-v1') || '{}');
+        settings.voiceName = e.target.value || null;
+        localStorage.setItem('reading-room-global-settings-v1', JSON.stringify(settings));
+      } catch(err) {}
+    });
   }else{
     renderInstalledVoicesList([]);
   }
@@ -1628,7 +1656,8 @@
     fontFamily:'serif', theme:'paper', fontSize:19, lineHeight:1.75,
     readerWidth:680, paragraphMargin:1.1, indent:0, pagePadding:56,
     align:'left', writing:'horizontal',
-    customBg:null, customFg:null, customCard:null
+    customBg:null, customFg:null, customCard:null,
+    voiceName:null
   };
   const GLOBAL_SETTINGS_KEY = 'reading-room-global-settings-v1';
   function loadGlobalSettings(){
