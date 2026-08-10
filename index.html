@@ -243,6 +243,21 @@
     background:rgba(217,178,62,0.08);
   }
   .tocItem.sub{padding-left:22px;font-size:12.5px;color:#a9b3ac;}
+  #sidebarTools{padding:10px 14px 8px 52px;border-bottom:1px solid rgba(255,255,255,.08);display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .sideTool{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:#c7cfc9;border-radius:7px;padding:7px 8px;cursor:pointer;font-size:11.5px;text-align:left}
+  .sideTool:hover{border-color:var(--brass-bright);color:#fff}
+  .annotationSection{display:none;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:4px}.annotationSection.open{display:block}
+  .annotationHeading{padding:8px 52px 4px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass-bright)}
+  #bookmarkList,#highlightList{max-height:180px;overflow:auto;padding:4px 14px 8px 52px}
+  .annotationItem{display:flex;align-items:center;gap:6px;width:100%;border:0;background:none;color:#c7cfc9;text-align:left;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:11.5px}.annotationItem:hover{background:rgba(255,255,255,.06);color:#fff}
+  .annotationDot{width:9px;height:9px;border-radius:50%;flex:0 0 9px;border:1px solid rgba(255,255,255,.35)}
+  #highlightFilters{display:flex;gap:5px;padding:2px 14px 5px 52px;flex-wrap:wrap}.highlightFilter{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.35);cursor:pointer;padding:0}.highlightFilter.active{outline:2px solid var(--brass-bright);outline-offset:1px}
+  #searchOverlay,#highlightOverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:80;display:none;align-items:flex-start;justify-content:center;padding-top:10vh}#searchOverlay.open,#highlightOverlay.open{display:flex}
+  .utilityDialog{width:min(680px,calc(100vw - 32px));background:var(--reading-card);color:var(--reading-fg);border:1px solid var(--edge);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.35);padding:16px}.utilityDialog h2{margin:0 0 10px;font-size:18px;font-family:'Fraunces',serif}
+  #sectionSearchInput{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--edge);border-radius:8px;background:var(--reading-bg);color:var(--reading-fg);font-size:14px}#searchResults{max-height:45vh;overflow:auto;margin-top:10px}.searchResult{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--edge);background:none;color:var(--reading-fg);padding:9px 4px;cursor:pointer}.searchResult:hover{background:rgba(184,145,47,.10)}.searchMeta{display:block;font-size:10px;color:var(--text-soft);margin-top:3px}
+  .utilityFoot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px}.utilityFoot button{border:1px solid var(--edge);background:var(--paper-2);color:var(--text);border-radius:7px;padding:7px 10px;cursor:pointer}.highlightColors{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.highlightColor{width:34px;height:30px;border:2px solid transparent;border-radius:7px;cursor:pointer}.highlightColor.active{border-color:var(--reading-fg);box-shadow:0 0 0 2px var(--brass)}
+  mark.userHighlight{color:inherit !important;border-radius:2px;padding:0 .05em}.userHighlightYellow{background:#ffe56b !important}.userHighlightGreen{background:#9be7a4 !important}.userHighlightBlue{background:#8ec5ff !important}.userHighlightPink{background:#ff9fc4 !important}.userHighlightPurple{background:#c6a5ff !important}
+
 
   #sidebarFoot{
     padding:14px 26px 18px 52px;
@@ -867,17 +882,20 @@
   <div id="reader">
     <div id="readerTopActions">
       <button class="readerTool" id="backLibraryBtn">← Library</button>
-      <button class="readerTool" id="readerSettingsBtn">⚙ Customize</button>
+      <button class="readerTool" id="searchTopBtn">⌕ Search</button><button class="readerTool" id="highlightTopBtn">🖍 Highlight</button><button class="readerTool" id="readerSettingsBtn">⚙ Customize</button>
     </div>
     <aside id="sidebar">
       <div id="ribbonTrack"></div>
       <div id="ribbon"></div>
       <div id="bookMeta">
-        <div class="eyebrow">Now Reading</div>
-        <h2 id="bookTitle">—</h2>
-        <p id="bookAuthor">—</p>
-        <div id="progressText"></div>
+        <div class="eyebrow">Now Reading</div><h2 id="bookTitle">—</h2><p id="bookAuthor">—</p><div id="progressText"></div>
       </div>
+      <div id="sidebarTools">
+        <button class="sideTool" id="searchSectionBtn">⌕ Search</button><button class="sideTool" id="bookmarkHereBtn">🔖 Bookmark</button>
+        <button class="sideTool" id="toggleBookmarksBtn">Bookmarks</button><button class="sideTool" id="toggleHighlightsBtn">Highlights</button>
+      </div>
+      <div id="bookmarkSection" class="annotationSection"><div class="annotationHeading">Bookmarks</div><div id="bookmarkList"></div></div>
+      <div id="highlightSection" class="annotationSection"><div class="annotationHeading">Highlights</div><div id="highlightFilters"></div><div id="highlightList"></div></div>
       <nav id="tocWrap"></nav>
       <div id="sidebarFoot">
         <button id="newBookBtn">Open a different book</button>
@@ -933,6 +951,8 @@
     </div>
   </div>
 
+  <div id="searchOverlay"><div class="utilityDialog" role="dialog" aria-label="Search sections"><h2>Search this section</h2><input id="sectionSearchInput" type="search" placeholder="Search like Ctrl+F…" autocomplete="off"><div id="searchResults"></div><div class="utilityFoot"><span id="searchCount" style="font-size:11px;color:var(--text-soft)"></span><button id="searchCloseBtn">Close</button></div></div></div>
+  <div id="highlightOverlay"><div class="utilityDialog" role="dialog" aria-label="Highlight color"><h2>Highlight selection</h2><div class="highlightColors"><button class="highlightColor active" data-highlight-color="yellow" style="background:#ffe56b" title="Yellow"></button><button class="highlightColor" data-highlight-color="green" style="background:#9be7a4" title="Green"></button><button class="highlightColor" data-highlight-color="blue" style="background:#8ec5ff" title="Blue"></button><button class="highlightColor" data-highlight-color="pink" style="background:#ff9fc4" title="Pink"></button><button class="highlightColor" data-highlight-color="purple" style="background:#c6a5ff" title="Purple"></button></div><p style="font-size:12px;color:var(--text-soft);margin:0">Select text in the book, choose a color, then press Apply.</p><div class="utilityFoot"><button id="highlightCancelBtn">Cancel</button><button id="highlightApplyBtn">Apply highlight</button></div></div></div>
   <div id="voiceModalOverlay">
     <div id="voiceModal" role="dialog" aria-label="Add more voices">
       <button class="closeBtn" id="closeVoiceModal" aria-label="Close">✕</button>
@@ -1004,7 +1024,7 @@
     chapterIndex:0, chapters:{}, // cache of rendered {html} per spine index
     sentenceIdx:-1,
     playing:false, paused:false,
-    voices:[], rate:1, pitch:1,
+    voices:[], rate:1, pitch:1, bookmarks:[], highlights:[],
   };
 
   const el = id => document.getElementById(id);
@@ -1312,6 +1332,7 @@
       });
     
       wrapSentences(chapterContentEl);
+      requestAnimationFrame(()=>restoreChapterHighlights());
 
       const h = chapterContentEl.querySelector('h1,h2,h3');
       chapterTitleEl.textContent = tocTitleFor(href) || (h ? h.textContent.trim() : '');
@@ -1576,6 +1597,27 @@
     fontSize = Math.max(14, fontSize-1);
     document.documentElement.style.setProperty('--reading-size', fontSize+'px');
   });
+  // ---------- Bookmarks, highlights + section search ----------
+  let selectedHighlightColor='yellow', pendingHighlightRange=null;
+  const colorHex={yellow:'#ffe56b',green:'#9be7a4',blue:'#8ec5ff',pink:'#ff9fc4',purple:'#c6a5ff'};
+  function currentChapterTitle(){return chapterTitleEl.textContent.trim()||tocTitleFor(state.spine[state.chapterIndex])||('Section '+(state.chapterIndex+1));}
+  function currentTitleForIndex(i){return state.toc.find(t=>state.spine.indexOf((t.href||'').split('#')[0])===i)?.title||('Section '+(i+1));}
+  function shortText(t,n=70){t=String(t||'').replace(/\s+/g,' ').trim();return t.length>n?t.slice(0,n-1)+'…':t;}
+  function textOffset(root,node,off){let w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),t=0,n;while(n=w.nextNode()){if(n===node)return t+off;t+=n.nodeValue.length}return t}
+  function pointAt(root,target){let w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),t=0,n;while(n=w.nextNode()){let z=t+n.nodeValue.length;if(target<=z)return{node:n,offset:Math.max(0,target-t)};t=z}return{node:root,offset:root.childNodes.length}}
+  function persistAnnotations(){persistCurrentBook();renderAnnotationLists();}
+  function addBookmark(){state.bookmarks.push({id:Date.now()+Math.random(),chapterIndex:state.chapterIndex,scrollTop:paneOuter.scrollTop,title:currentChapterTitle(),text:shortText(chapterContentEl.textContent,90)});persistAnnotations();}
+  async function jumpToBookmark(b){if(b.chapterIndex!==state.chapterIndex)await loadChapter(b.chapterIndex);requestAnimationFrame(()=>paneOuter.scrollTo({top:b.scrollTop||0,behavior:'smooth'}));}
+  function selectionData(){const s=getSelection();if(!s||!s.rangeCount||s.isCollapsed)return null;const r=s.getRangeAt(0);if(!chapterContentEl.contains(r.commonAncestorContainer))return null;const start=textOffset(chapterContentEl,r.startContainer,r.startOffset),end=textOffset(chapterContentEl,r.endContainer,r.endOffset),text=s.toString().trim();return text&&end>start?{start,end,text}:null;}
+  function openHighlightPicker(){const d=selectionData();if(!d){setStatus('Select some text in the section first.');return}pendingHighlightRange=d;el('highlightOverlay').classList.add('open');}
+  function wrapRange(start,end,color){const a=pointAt(chapterContentEl,start),b=pointAt(chapterContentEl,end),r=document.createRange();r.setStart(a.node,a.offset);r.setEnd(b.node,b.offset);const w=document.createTreeWalker(chapterContentEl,NodeFilter.SHOW_TEXT),nodes=[];let n;while(n=w.nextNode()){if(!r.intersectsNode(n)||n.parentElement.closest('.userHighlight'))continue;const x=n===r.startContainer?r.startOffset:0,y=n===r.endContainer?r.endOffset:n.nodeValue.length;if(y>x)nodes.push({n,x,y})}nodes.forEach(o=>{const q=document.createRange();q.setStart(o.n,o.x);q.setEnd(o.n,o.y);const m=document.createElement('mark');m.className='userHighlight userHighlight'+color[0].toUpperCase()+color.slice(1);m.dataset.highlightColor=color;q.surroundContents(m)});}
+  function applyHighlight(d,color){wrapRange(d.start,d.end,color);state.highlights.push({id:Date.now()+Math.random(),chapterIndex:state.chapterIndex,start:d.start,end:d.end,text:d.text,color});getSelection()?.removeAllRanges();persistAnnotations();}
+  function restoreChapterHighlights(){(state.highlights||[]).filter(h=>h.chapterIndex===state.chapterIndex).forEach(h=>{try{wrapRange(h.start,h.end,h.color)}catch(e){}})}
+  function jumpToHighlight(h){(async()=>{if(h.chapterIndex!==state.chapterIndex)await loadChapter(h.chapterIndex);requestAnimationFrame(()=>{const p=pointAt(chapterContentEl,h.start);p.node.parentElement?.closest('.userHighlight')?.scrollIntoView({behavior:'smooth',block:'center'})||p.node.parentElement?.scrollIntoView({behavior:'smooth',block:'center'})})})()}
+  function renderAnnotationLists(){const bl=el('bookmarkList'),hl=el('highlightList'),f=el('highlightFilters');if(!bl)return;bl.innerHTML=state.bookmarks.length?state.bookmarks.map(b=>`<button class="annotationItem" data-bid="${b.id}">🔖 <span>${escapeHtml(shortText(b.title,34))}<span class="searchMeta">${escapeHtml(shortText(b.text,45))}</span></span><span style="margin-left:auto">×</span></button>`).join(''):'<div style="font-size:11px;color:#8a9490;padding:6px 8px">No bookmarks yet.</div>';bl.querySelectorAll('[data-bid]').forEach(x=>x.onclick=e=>{const b=state.bookmarks.find(v=>v.id==x.dataset.bid);if(e.target.textContent==='×'){state.bookmarks=state.bookmarks.filter(v=>v.id!=x.dataset.bid);persistAnnotations()}else if(b)jumpToBookmark(b)});if(!hl)return;const active=f.querySelector('.active')?.dataset.filter||'all';f.innerHTML=['all',...Object.keys(colorHex)].map(c=>`<button class="highlightFilter ${c===active?'active':''}" data-filter="${c}" title="${c}" style="background:${c==='all'?'linear-gradient(135deg,#ffe56b 20%,#9be7a4 20% 40%,#8ec5ff 40% 60%,#ff9fc4 60% 80%,#c6a5ff 80%)':colorHex[c]}"></button>`).join('');f.querySelectorAll('[data-filter]').forEach(x=>x.onclick=()=>{f.querySelectorAll('.highlightFilter').forEach(y=>y.classList.remove('active'));x.classList.add('active');renderAnnotationLists()});hl.innerHTML=state.highlights.filter(h=>active==='all'||h.color===active).map(h=>`<button class="annotationItem" data-hid="${h.id}"><span class="annotationDot" style="background:${colorHex[h.color]}"></span><span>${escapeHtml(shortText(h.text,60))}<span class="searchMeta">${escapeHtml(currentTitleForIndex(h.chapterIndex))}</span></span><span style="margin-left:auto">×</span></button>`).join('')||'<div style="font-size:11px;color:#8a9490;padding:6px 8px">No highlights yet.</div>';hl.querySelectorAll('[data-hid]').forEach(x=>x.onclick=e=>{const id=x.dataset.hid;if(e.target.textContent==='×'){state.highlights=state.highlights.filter(v=>v.id!=id);loadChapter(state.chapterIndex).then(renderAnnotationLists)}else{const h=state.highlights.find(v=>v.id==id);if(h)jumpToHighlight(h)}})}
+  function openSearch(){el('searchOverlay').classList.add('open');el('sectionSearchInput').value='';renderSearchResults('');setTimeout(()=>el('sectionSearchInput').focus(),20)}
+  function renderSearchResults(q){q=q.trim().toLowerCase();if(!q){el('searchResults').innerHTML='<div style="font-size:12px;color:var(--text-soft);padding:10px 4px">Type to search this section.</div>';el('searchCount').textContent='';return}const text=chapterContentEl.textContent.replace(/\s+/g,' ').trim(),low=text.toLowerCase(),out=[];let p=low.indexOf(q);while(p>=0&&out.length<100){out.push(p);p=low.indexOf(q,p+q.length)}el('searchCount').textContent=out.length+' match'+(out.length===1?'':'es');el('searchResults').innerHTML=out.length?out.map((p,i)=>`<button class="searchResult" data-pos="${p}"><strong>Match ${i+1}</strong><span class="searchMeta">${escapeHtml(currentChapterTitle())}</span>${escapeHtml(shortText(text.slice(Math.max(0,p-55),p+q.length+55),125))}</button>`).join(''):'<div style="font-size:12px;color:var(--text-soft);padding:10px 4px">No matches in this section.</div>';el('searchResults').querySelectorAll('[data-pos]').forEach(x=>x.onclick=()=>{const p=pointAt(chapterContentEl,Number(x.dataset.pos));p.node.parentElement?.scrollIntoView({behavior:'smooth',block:'center'});})}
+
 // ---------- Persistent library + settings ----------
   const DB_NAME = 'reading-room-library-v2';
   const DB_VERSION = 1;
@@ -1707,6 +1749,7 @@
       id, name:file.name, title:state.title, author:state.author,
       size:file.size, chapterCount:state.spine.length, buffer:buf, cover:parsedCover ? parsedCover.dataUrl : (old&&old.cover)||null,
       position:(old&&old.position)||{chapterIndex:0,scrollTop:0,sentenceIdx:-1},
+      bookmarks:(old&&old.bookmarks)||[], highlights:(old&&old.highlights)||[],
       settings:(old&&old.settings)||{...readerSettings},
       createdAt:(old&&old.createdAt)||Date.now(), updatedAt:Date.now()
     };
@@ -1802,6 +1845,7 @@
         const b=await dbGet(currentBookId);
         if(!b) return;
         b.position={chapterIndex:state.chapterIndex,scrollTop:paneOuter.scrollTop,sentenceIdx:state.sentenceIdx};
+        b.bookmarks=state.bookmarks||[]; b.highlights=state.highlights||[];
         // global settings - per-book settings removed
         // b.settings no longer saved
         b.updatedAt=Date.now();
@@ -1986,8 +2030,10 @@
       await parseEpub(zip);
       el('library').classList.remove('active');
       showReader(false);
+      state.bookmarks=Array.isArray(b.bookmarks)?b.bookmarks:[]; state.highlights=Array.isArray(b.highlights)?b.highlights:[];
       await loadChapter((b.position&&b.position.chapterIndex)||0);
       paneOuter.scrollTop=(b.position&&b.position.scrollTop)||0;
+      renderAnnotationLists();
       state.sentenceIdx=(b.position&&b.position.sentenceIdx>=0)?b.position.sentenceIdx:-1;
       applySettings();
       setStatus('');
@@ -2043,9 +2089,11 @@
     setStatus('Saving '+file.name+' to your library …');
     try{
       await importBookToLibrary(file);
+      state.bookmarks=[]; state.highlights=[];
       showReader(true);
       await loadChapter(0);
       applySettings();
+      renderAnnotationLists();
       setStatus('');
     }catch(err){
       console.error(err);
@@ -2154,6 +2202,8 @@
     paneOuter.addEventListener('scroll',persistCurrentBook,{passive:true});
     window.addEventListener('beforeunload',()=>persistCurrentBook());
   }
+
+  el('bookmarkHereBtn').onclick=addBookmark;el('searchSectionBtn').onclick=openSearch;el('searchTopBtn').onclick=openSearch;el('highlightTopBtn').onclick=openHighlightPicker;el('toggleBookmarksBtn').onclick=()=>el('bookmarkSection').classList.toggle('open');el('toggleHighlightsBtn').onclick=()=>{el('highlightSection').classList.toggle('open');renderAnnotationLists()};el('searchCloseBtn').onclick=()=>el('searchOverlay').classList.remove('open');el('searchOverlay').onclick=e=>{if(e.target===el('searchOverlay'))el('searchOverlay').classList.remove('open')};el('sectionSearchInput').oninput=e=>renderSearchResults(e.target.value);el('highlightCancelBtn').onclick=()=>{pendingHighlightRange=null;el('highlightOverlay').classList.remove('open')};el('highlightOverlay').onclick=e=>{if(e.target===el('highlightOverlay'))el('highlightOverlay').classList.remove('open')};document.querySelectorAll('.highlightColor').forEach(b=>b.onclick=()=>{selectedHighlightColor=b.dataset.highlightColor;document.querySelectorAll('.highlightColor').forEach(x=>x.classList.toggle('active',x===b))});el('highlightApplyBtn').onclick=()=>{if(pendingHighlightRange)applyHighlight(pendingHighlightRange,selectedHighlightColor);pendingHighlightRange=null;el('highlightOverlay').classList.remove('open')};
 
   // Customization UI.
   function openSettings(){
@@ -2314,6 +2364,7 @@
   // ---------- Keyboard shortcuts ----------
   window.addEventListener('keydown', e => {
     const tag = (e.target.tagName||'').toLowerCase();
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'&&readerEl.classList.contains('active')){e.preventDefault();openSearch();return;}
     if(tag==='input' || tag==='select' || tag==='textarea') return;
     if(!readerEl.classList.contains('active')) return;
     if(e.code === 'Space'){ e.preventDefault(); togglePlay(); }
